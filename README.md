@@ -1,0 +1,1 @@
+netlify-cms-loader
