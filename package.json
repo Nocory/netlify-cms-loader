@@ -1,0 +1,29 @@
+{
+	"name": "netlify-cms-loader",
+	"version": "0.1.0",
+	"description": "netlify-cms-loader",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Nocory/netlify-cms-loader.git"
+	},
+	"keywords": [
+		"netlify",
+		"cms",
+		"loader",
+		"webpack"
+	],
+	"author": "Marc Eichhorn <contact@marceichhorn.com>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Nocory/netlify-cms-loader/issues"
+	},
+	"homepage": "https://github.com/Nocory/netlify-cms-loader#readme",
+	"dependencies": {
+		"front-matter": "^2.2.0",
+		"js-yaml": "^3.10.0"
+	}
+}
