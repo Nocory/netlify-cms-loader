@@ -18,9 +18,9 @@ const cmsPosts = require('netlify-cms-loader?collection=posts!../admin/config.ym
 
 The loaders output is an array of objects, corresponding to the processed markdown files of the collection.
 
-In addition to each files front-matter, the loader adds two additional properties ***'filePath'*** and ***'hasBody'***.
+In addition to each files front-matter, the loader adds two additional properties ***'filePath'*** and ***'hasBody'*** . (Please make sure, that these don't collide with the fields from your CMS collection. This might be addressed in future versions, if it turns out to be an issue.)
 
-***filePath*** is the path of the .md file in the build directory and ***hadBody*** indicates, whether there is a body-section present in the .md file.
+***filePath*** is the path of the .md file in the build directory and ***hasBody*** indicates, whether there is a body-section present in the .md file.
 
 Depending on the loader-options, a markdown files body may be included in the output array or needs to be fetched later on by the website/app.
 
