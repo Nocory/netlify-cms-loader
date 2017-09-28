@@ -1,12 +1,13 @@
 ## netlify-cms-loader
 
-A webpack loader, that makes it easier to access content from the Netlify CMS in your normal website or single-page-application.
+A webpack loader, that makes it possible to access content from the [Netlify CMS](https://www.netlifycms.org/) in your website or single-page-application.
 
-The output of the loader is an array, containing information from all markdown files belonging to the specified collection.
+The output of the loader is an array, consisting of the filename and front-matter of each file belonging to the specified collection.
 
-By default only each files front matter is included in the output array.
-To get the body of a file you should have your app request it from the server or use the 'bodyLimit' option to add the body content to the loaders output during the build process.
+To get the body of a file you should have your site/app fetch it from the server or use the loaders 'bodyLimit' option to add the body content to the output array during the build process.
 By default only very short body strings (<128) are loaded during the build process.
+
+Depending on the amount of files in the collection and length of the body-markup strings, it might either be more efficient to add them all during the build process or let the app decide which files to fetch later on with additional AJAX requests.
 
 ---
 #### Installing the loader
@@ -27,8 +28,8 @@ const cmsPosts = require('netlify-cms-loader?collection=posts!../admin/config.ym
 ---
 #### Loader options
 
-* **collection** *(required, default "posts")*
-  * Name of the collection you want to retrieve
+* **collection** *(required)*
+  * Name of the collection you want to retrieve.
 * **bodyLimit** *(optional, default 128)*
   * include markdown body in the results, if body-length is less than specified. This can save HTML requests for small items later on.
 

@@ -17,6 +17,10 @@ const loaderFnc = function (source) {
 	const cmsConfig = yaml.safeLoad(source)
 	const options = loaderUtils.getOptions(this)
 
+	if (!options.collection) {
+		this.emitError("no collection specified")
+	}
+
 	/*** OPTIONS ***
 		collection (String: "posts") => specify which collection should be processed 
 		bodyLimit (Number: 128) => include markdown body in the results, if length is less than specified
@@ -25,7 +29,12 @@ const loaderFnc = function (source) {
 		TODO: itemLimit (Number: 0) => First n items to get from the collection. (this happens after any sorting or reversing)
 	***************/
 
-	const collection = cmsConfig.collections.find((el) => el.name === options.collection)
+	const collection = cmsConfig.collections.find((el) => el.name === (options.collection || "posts"))
+
+	if (!collection) {
+		this.emitError("collection not found in config")
+	}
+
 	const collectioneHasBody = checkForBody(collection)
 
 	let result = []
@@ -34,7 +43,7 @@ const loaderFnc = function (source) {
 	for (let fileName of filesInCollection) {
 		let fileContent = this.fs.readFileSync(path.resolve(collection.folder, fileName), {
 			encoding: 'utf8'
-		}) //FIXME: encoding not working??
+		}) //FIXME: encoding not working?? Have to convert to string
 		fileContent = fileContent.toString()
 		let fmContent = fm(fileContent)
 		let cmsEntry = fmContent.attributes
@@ -45,8 +54,6 @@ const loaderFnc = function (source) {
 
 		cmsEntry.filename = fileName
 		cmsEntry.hasBody = collectioneHasBody
-		let fileStats = this.fs.statSync(path.resolve(collection.folder, fileName))
-		cmsEntry.birthtimeMs = fileStats.birthtimeMs
 		result.push(cmsEntry)
 	}
 
