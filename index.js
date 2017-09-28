@@ -1,3 +1,11 @@
+/* OPTIONS
+
+	collection (default: "") => specify which collection should be processed 
+	bodyLimit (default: 128) => include markdown body in the results, if length is less than specified
+	copyFiles (default true) => set to false, if you do not want the loader to automatically copy files to the build directory
+	outputDirectory (default: "cms") => by default .md files are copied to "cms/[collection-name]/[file-name]"
+
+*/
 const yaml = require('js-yaml')
 const path = require('path')
 const fm = require('front-matter')
@@ -10,32 +18,49 @@ const checkForBody = (collection) => {
 	return false
 }
 
-const loaderFnc = function (source) {
-	console.time("Netlify-CMS Loader")
+let copiedFiles = new Set()
+let isMediaCopied = false
+
+const loaderFnc = function(source) {
+	console.time("netlify-cms-loader")
 	this.cacheable()
 
 	const cmsConfig = yaml.safeLoad(source)
-	const options = loaderUtils.getOptions(this)
 
+	// Merging default and user specified options
+	const options = {
+		collection: "",
+		bodyLimit: 128,
+		copyFiles: true,
+		outputDirectory: "cms"
+	}
+	Object.assign(options, loaderUtils.getOptions(this))
+
+	// Copy upload/file assets only ONCE to the build directory
+	if (options.copyFiles && !isMediaCopied) {
+		const filesInCollection = this.fs.readdirSync(cmsConfig.media_folder)
+		for (let fileName of filesInCollection) {
+			let fileContent = this.fs.readFileSync(path.resolve(cmsConfig.media_folder, fileName))
+			this.emitFile(path.join(cmsConfig.public_folder, fileName), fileContent)
+		}
+		isMediaCopied = true
+	}
+
+	// Check collection is valid, otherwise exit with error //TODO: improve (see error message)
 	if (!options.collection) {
 		this.emitError("no collection specified")
 	}
-
-	/*** OPTIONS ***
-		collection (String: "posts") => specify which collection should be processed 
-		bodyLimit (Number: 128) => include markdown body in the results, if length is less than specified
-		TODO: sortBy (String: "") => sort objects in result array by this property
-		TODO: reverse (Bool: false) => reverse result array
-		TODO: itemLimit (Number: 0) => First n items to get from the collection. (this happens after any sorting or reversing)
-	***************/
-
-	const collection = cmsConfig.collections.find((el) => el.name === (options.collection || "posts"))
-
+	const collection = cmsConfig.collections.find((el) => el.name === options.collection)
 	if (!collection) {
 		this.emitError("collection not found in config")
 	}
 
-	const collectioneHasBody = checkForBody(collection)
+	/*
+		Check if items of the collection have a body. This is assigned to the '.hasBody' property.
+		Since not all collections might have markdown bodies, this info can be useful to decide,
+		whether the .md file needs to be fetched by the app.
+	*/
+	const collectionHasBody = checkForBody(collection)
 
 	let result = []
 
@@ -48,36 +73,25 @@ const loaderFnc = function (source) {
 		let fmContent = fm(fileContent)
 		let cmsEntry = fmContent.attributes
 
-		if (fmContent.body.length < (options.bodyLimit || 128)) {
+		if (collectionHasBody && fmContent.body.length < options.bodyLimit) {
 			cmsEntry.body = fmContent.body
 		}
 
-		cmsEntry.filename = fileName
-		cmsEntry.hasBody = collectioneHasBody
+		// Automatically copying CMS .md files to the build directory, unless specified otherwise by options
+		let copyPath = path.join(options.outputDirectory, collection.name, fileName)
+		if (options.copyFiles && !copiedFiles.has(copyPath)) {
+			this.emitFile(copyPath, fileContent)
+			copiedFiles.add(copyPath)
+			cmsEntry.filePath = copyPath
+		}
+
+		cmsEntry.hasBody = collectionHasBody
 		result.push(cmsEntry)
 	}
 
-	/*
-	if (options.sortBy || "") {
-		result.sort((a, b) => {
-			return a[sortBy] - b[sortBy]
-		})
-	}
-
-	if (options.reverse || false) {
-		result.sort((a, b) => {
-			return a[sortBy] - b[sortBy]
-		})
-	}
-
-	// Trim array if itemlimit is pecified in options
-	if (options.itemLimit || 0) {
-		result = result.slice(0, options.itemLimit)
-	}
-	*/
-
 	console.log("======================")
-	console.timeEnd("Netlify-CMS Loader")
+	console.log(`Loaded CMS collection: ${collection.name}`)
+	console.timeEnd("netlify-cms-loader")
 	console.log("======================")
 
 	return `module.exports = ${JSON.stringify(result)}`
