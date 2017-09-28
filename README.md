@@ -1,13 +1,10 @@
 ## netlify-cms-loader
 
-A webpack loader, that makes it possible to access content from the [Netlify CMS](https://www.netlifycms.org/) in your website or single-page-application.
+A webpack loader, that makes it easier to access content from the [Netlify CMS](https://www.netlifycms.org/) in your website or single-page-application.
 
-The output of the loader is an array, consisting of the filename and front-matter of each file belonging to the specified collection.
+The loader processes all .md files of a collection and outputs their front-matter and file path as an array of objects.
 
-To get the body of a file you should have your site/app fetch it from the server or use the loaders 'bodyLimit' option to add the body content to the output array during the build process.
-By default only very short body strings ( < 128 ) are loaded during the build process.
-
-Depending on the amount of files in the collection and length of the body-markup strings, it might either be more efficient to add them all during the build process or let the app decide which files to fetch later on with additional AJAX requests.
+Processed .md files and any assets in the "media_folder" are also automatically copied to the build directory, so they can be fetched by the app later on.
 
 ---
 #### Using the loader
