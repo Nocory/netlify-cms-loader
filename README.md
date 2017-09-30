@@ -4,7 +4,9 @@ A webpack loader, that makes it easier to access content from the [Netlify CMS](
 
 The loader processes all .md files of a collection and outputs their front-matter and file path as an array of objects.
 
-Processed .md files and any assets in the "media_folder" are also automatically copied to the build directory, so they can be fetched by the app later on.
+Processed .md files and any assets in the "media_folder" are automatically copied to the build directory, so they can be fetched by the app later on.
+
+**Note:** This is a 3rd-party loader. I am in no way affiliated with [Netlify](https://www.netlify.com/), though I wholeheartedly recommend anyone to check them out.
 
 ---
 #### Using the loader

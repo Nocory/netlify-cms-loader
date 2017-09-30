@@ -30,7 +30,7 @@ const loaderFnc = function(source) {
 	// Merging default and user specified options
 	const options = {
 		collection: "",
-		bodyLimit: 128,
+		bodyLimit: 256,
 		copyFiles: true,
 		outputDirectory: "cms"
 	}
