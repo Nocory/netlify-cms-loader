@@ -21,7 +21,7 @@ Processed .md files and any assets in the "media_folder" are automatically copie
 
 ---
 #### Using the loader
-require() your Netlify CMS config file with the laoder inline.
+require() your Netlify CMS config file with the loader inline.
 
 You must at least specify the name of the collection, that you want to retreive information about. The remaining options have fairly sane defaults, but can always be changed to your liking.
 

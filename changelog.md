@@ -1,3 +1,6 @@
+###### 0.3.1
+- readme typo fix
+
 ###### 0.3.0
 - updated readme
 - changed effect of option ```copyFiles```: now only copies processed .md files (previously also copied media files)
