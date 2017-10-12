@@ -2,20 +2,31 @@
 
 A webpack loader, that makes it easier to access content from the [Netlify CMS](https://www.netlifycms.org/) in your website or single-page-application.
 
-The loader processes all .md files of a collection and outputs their front-matter and file path as an array of objects.
+The loader processes all .md files of a collection and outputs their content and file path as an array of objects.
 
-Processed .md files and any assets in the "media_folder" are automatically copied to the build directory, so they can be fetched by the app later on.
+Processed .md files and any assets in the "media_folder" are automatically copied to the output directory, so they can be fetched by the app later on.
 
 **Note:** This is a 3rd-party loader. I am in no way affiliated with [Netlify](https://www.netlify.com/), though I wholeheartedly recommend anyone to check them out.
 
 ---
-#### Using the loader
-require() your Netlify CMS config file using the netlify-cms-loader.
+#### Loader options
 
-You must specify the name of the collection, that you want to retreive information about.
+* ```collection``` *("posts", **required**)* Name of the collection you want to retrieve.
+* ```bodyLimit``` *(256)* Include markdown body in the results, if body-length is less than specified. This can save HTML requests for small items later on.
+* ```copyFiles``` *(true)* copy processed .md files to the output directory.
+* ```copyMedia``` *(true)* copy all media-files from the media directory to the output directory.
+* ```sortBy``` *("")* name of widget the output should be sorted by. Leave empty to skip sorting.
+* ```reverse``` *(false)* reverse output array. Useful for sorting by date with newest item coming first.
+* ```outputDirectory``` *("cms")* If copyFiles is true, then .md files are copied to "[outputDirectory]/[collectionName]/[fileName]".
+
+---
+#### Using the loader
+require() your Netlify CMS config file with the laoder inline.
+
+You must at least specify the name of the collection, that you want to retreive information about. The remaining options have fairly sane defaults, but can always be changed to your liking.
 
 ```javascript
-const cmsPosts = require('netlify-cms-loader?collection=posts!../admin/config.yml')
+const cmsPosts = require('!netlify-cms-loader?collection=posts!../admin/config.yml')
 ```
 
 The loaders output is an array of objects, corresponding to the processed markdown files of the collection.
@@ -48,33 +59,6 @@ Depending on the loader-options, a markdown files body may be included in the ou
 ```
 
 ---
-#### Loader options
-
-* **collection** *(required)*
-  * Name of the collection you want to retrieve.
-* **bodyLimit** *(optional, default 128)*
-  * Include markdown body in the results, if body-length is less than specified. This can save HTML requests for small items later on.
-* **copyFiles** *(optional, default true)*
-  * By default the loader will copy processed .md files and media assets to the build directory
-* **outputDirectory** *(optional, default "cms")*
-  * If copyFiles is true, then .md files are copied to "[outputDirectory]/[collectionName]/[fileName]"
-
----
-#### Copying CMS files to the build directory
-
-This is no longer necessary. The loader will automatically copy any required files of the CMS to the build directory.
-
-Only the Netlify CMS interface alone should be copied, if you would like to include it in that app.
-
-I recommend to use ***copy-webpack-plugin*** for this.
-
-```javascript
-new CopyWebpackPlugin([
-  { from: 'src/admin', to: 'admin' }
-])
-```
-
----
-See a live example of a site built with the loader [here](https://netlify-cms-loader.netlify.com/).
+See a live example of a test-site built with the loader [here](https://netlify-cms-loader.netlify.com/).
 
 Code example of a Vue component using the loader [here](https://github.com/Nocory/netlify_cms/blob/master/src/components/cms.vue).

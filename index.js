@@ -1,9 +1,14 @@
 /* OPTIONS
 
 	collection (default: "") => specify which collection should be processed 
-	bodyLimit (default: 128) => include markdown body in the results, if length is less than specified
-	copyFiles (default true) => set to false, if you do not want the loader to automatically copy files to the build directory
-	outputDirectory (default: "cms") => by default .md files are copied to "cms/[collection-name]/[file-name]"
+	bodyLimit (default: 256) => include markdown body in the results, if length is less than specified
+
+	copyFiles (default true) => copy the processed .md files to the output directory
+	copyMedia (default true) => copy content from the media folder to the output directory
+	sortBy (default "")
+	reverse (default false)
+
+	outputDirectory (default: "cms") => .md files are copied to "[outputDirectory]/[collection-name]/[file-name]"
 
 */
 const yaml = require('js-yaml')
@@ -29,15 +34,18 @@ const loaderFnc = function(source) {
 
 	// Merging default and user specified options
 	const options = {
-		collection: "",
+		collection: "posts",
 		bodyLimit: 256,
 		copyFiles: true,
+		copyMedia: true,
+		sortBy: "",
+		reverse: false,
 		outputDirectory: "cms"
 	}
 	Object.assign(options, loaderUtils.getOptions(this))
 
 	// Copy upload/file assets only ONCE to the build directory
-	if (options.copyFiles && !isMediaCopied) {
+	if (options.copyMedia && !isMediaCopied) {
 		const filesInCollection = this.fs.readdirSync(cmsConfig.media_folder)
 		for (let fileName of filesInCollection) {
 			let fileContent = this.fs.readFileSync(path.resolve(cmsConfig.media_folder, fileName))
@@ -73,6 +81,7 @@ const loaderFnc = function(source) {
 		let fmContent = fm(fileContent)
 		let cmsEntry = fmContent.attributes
 
+		cmsEntry.hasBody = collectionHasBody
 		if (collectionHasBody && fmContent.body.length < options.bodyLimit) {
 			cmsEntry.body = fmContent.body
 		}
@@ -85,9 +94,32 @@ const loaderFnc = function(source) {
 			cmsEntry.filePath = copyPath
 		}
 
-		cmsEntry.hasBody = collectionHasBody
 		result.push(cmsEntry)
 	}
+
+	if (result.length >= 2 &&
+		options.sortBy &&
+		result[0][options.sortBy]) {
+		//console.log("SORTING")
+		let isNumber = Date.parse(result[0][options.sortBy]) || Number(result[0][options.sortBy])
+		//console.log("isNumber", isNumber)
+		if (isNumber) {
+			//console.log("sorting by num")
+			result.sort((a, b) => a[options.sortBy] - b[options.sortBy])
+		} else {
+			//console.log("sorting by str")
+			result.sort((a, b) => {
+				let nameA = a[options.sortBy].toUpperCase()
+				let nameB = b[options.sortBy].toUpperCase()
+				if (nameA < nameB) return -1
+				if (nameA > nameB) return 1
+				return 0
+			})
+		}
+
+	}
+
+	if (options.reverse) result.reverse()
 
 	console.log("======================")
 	console.log(`Loaded CMS collection: ${collection.name}`)
