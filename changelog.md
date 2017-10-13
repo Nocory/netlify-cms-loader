@@ -1,3 +1,8 @@
+###### 0.4.0
+- readme typo fix
+- removed option ```copyMedia```: Turns out, that this option made no sense, since it would have to be set to the same for all required collections. Media files from the CMS are also something you generally always want included in your build.
+- improved console output during build process
+
 ###### 0.3.1
 - readme typo fix
 

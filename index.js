@@ -1,16 +1,3 @@
-/* OPTIONS
-
-	collection (default: "") => specify which collection should be processed 
-	bodyLimit (default: 256) => include markdown body in the results, if length is less than specified
-
-	copyFiles (default true) => copy the processed .md files to the output directory
-	copyMedia (default true) => copy content from the media folder to the output directory
-	sortBy (default "")
-	reverse (default false)
-
-	outputDirectory (default: "cms") => .md files are copied to "[outputDirectory]/[collection-name]/[file-name]"
-
-*/
 const yaml = require('js-yaml')
 const path = require('path')
 const fm = require('front-matter')
@@ -27,7 +14,7 @@ let copiedFiles = new Set()
 let isMediaCopied = false
 
 const loaderFnc = function(source) {
-	console.time("netlify-cms-loader")
+
 	this.cacheable()
 
 	const cmsConfig = yaml.safeLoad(source)
@@ -37,7 +24,7 @@ const loaderFnc = function(source) {
 		collection: "posts",
 		bodyLimit: 256,
 		copyFiles: true,
-		copyMedia: true,
+		//copyMedia: true,
 		sortBy: "",
 		reverse: false,
 		outputDirectory: "cms"
@@ -45,13 +32,16 @@ const loaderFnc = function(source) {
 	Object.assign(options, loaderUtils.getOptions(this))
 
 	// Copy upload/file assets only ONCE to the build directory
-	if (options.copyMedia && !isMediaCopied) {
+	if (!isMediaCopied) {
+		console.time("netlify-cms-loader: copied media files")
 		const filesInCollection = this.fs.readdirSync(cmsConfig.media_folder)
 		for (let fileName of filesInCollection) {
 			let fileContent = this.fs.readFileSync(path.resolve(cmsConfig.media_folder, fileName))
 			this.emitFile(path.join(cmsConfig.public_folder, fileName), fileContent)
 		}
 		isMediaCopied = true
+
+		console.timeEnd("netlify-cms-loader: copied media files")
 	}
 
 	// Check collection is valid, otherwise exit with error //TODO: improve (see error message)
@@ -62,6 +52,8 @@ const loaderFnc = function(source) {
 	if (!collection) {
 		this.emitError("collection not found in config")
 	}
+
+	console.time(`netlify-cms-loader: finished loading collection '${options.collection}'`)
 
 	/*
 		Check if items of the collection have a body. This is assigned to the '.hasBody' property.
@@ -121,10 +113,9 @@ const loaderFnc = function(source) {
 
 	if (options.reverse) result.reverse()
 
-	console.log("======================")
-	console.log(`Loaded CMS collection: ${collection.name}`)
-	console.timeEnd("netlify-cms-loader")
-	console.log("======================")
+
+	//console.log(`netlify-cms-loader: finished loading ${collection.name}`)
+	console.timeEnd(`netlify-cms-loader: finished loading collection '${options.collection}'`)
 
 	return `module.exports = ${JSON.stringify(result)}`
 }

@@ -12,7 +12,7 @@ Processed .md files and any assets in the "media_folder" are automatically copie
 #### Loader options
 
 * ```collection``` *("posts", **required**)* Name of the collection you want to retrieve.
-* ```bodyLimit``` *(256)* Include markdown body in the results, if body-length is less than specified. This can save HTML requests for small items later on.
+* ```bodyLimit``` *(256)* Include markdown body in the results, if body-length is less than specified. This can save http-requests for small items later on.
 * ```copyFiles``` *(true)* copy processed .md files to the output directory.
 * ```copyMedia``` *(true)* copy all media-files from the media directory to the output directory.
 * ```sortBy``` *("")* name of widget the output should be sorted by. Leave empty to skip sorting.
