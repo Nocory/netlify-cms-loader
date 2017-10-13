@@ -13,10 +13,9 @@ Processed .md files and any assets in the "media_folder" are automatically copie
 
 * ```collection``` *("posts", **required**)* Name of the collection you want to retrieve.
 * ```bodyLimit``` *(256)* Include markdown body in the results, if body-length is less than specified. This can save http-requests for small items later on.
-* ```copyFiles``` *(true)* copy processed .md files to the output directory.
-* ```copyMedia``` *(true)* copy all media-files from the media directory to the output directory.
-* ```sortBy``` *("")* name of widget the output should be sorted by. Leave empty to skip sorting.
-* ```reverse``` *(false)* reverse output array. Useful for sorting by date with newest item coming first.
+* ```copyFiles``` *(true)* Copy processed .md files to the output directory.
+* ```sortBy``` *("")* Name of widget the output should be sorted by. Leave empty to skip sorting.
+* ```reverse``` *(false)* Reverse output array. Useful for sorting by date with newest item coming first.
 * ```outputDirectory``` *("cms")* If copyFiles is true, then .md files are copied to "[outputDirectory]/[collectionName]/[fileName]".
 
 ---

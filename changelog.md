@@ -1,4 +1,7 @@
-###### 0.4.0
+###### 0.4.1
+- actually update readme
+
+### 0.4.0
 - readme typo fix
 - removed option ```copyMedia```: Turns out, that this option made no sense, since it would have to be set to the same for all required collections. Media files from the CMS are also something you generally always want included in your build.
 - improved console output during build process
@@ -6,7 +9,7 @@
 ###### 0.3.1
 - readme typo fix
 
-###### 0.3.0
+### 0.3.0
 - updated readme
 - changed effect of option ```copyFiles```: now only copies processed .md files (previously also copied media files)
 - added option ```copyMedia```: *default true*, copy all media-files from the media directory to the output directory
