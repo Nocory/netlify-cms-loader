@@ -1,9 +1,11 @@
 const yaml = require('js-yaml')
 const path = require('path')
 const fm = require('front-matter')
+//const md = require('markdown-it')()
 const loaderUtils = require("loader-utils")
 
 const checkForBody = (collection) => {
+	console.log(collection)
 	for (let field of collection.fields) {
 		if (field.name === "body") return true
 	}
@@ -62,7 +64,7 @@ const loaderFnc = function(source) {
 	*/
 	const collectionHasBody = checkForBody(collection)
 
-	let result = []
+	const result = []
 
 	const filesInCollection = this.fs.readdirSync(collection.folder)
 	for (let fileName of filesInCollection) {
@@ -81,9 +83,19 @@ const loaderFnc = function(source) {
 		// Automatically copying CMS .md files to the build directory, unless specified otherwise by options
 		let copyPath = path.join(options.outputDirectory, collection.name, fileName)
 		if (options.copyFiles && !copiedFiles.has(copyPath)) {
+			// *.md
 			this.emitFile(copyPath, fileContent)
 			copiedFiles.add(copyPath)
-			cmsEntry.filePath = copyPath
+			// *.json
+			const jsonPath = (copyPath).replace(/\.md$/,".json")
+			cmsEntry.filePath = jsonPath
+			const jsonOut = Object.assign({},cmsEntry)
+			//console.log(jsonPath)
+			//console.log(jsonOut)
+			//if(collectionHasBody && !jsonOut.body) jsonOut.body = md.render(fmContent.body)
+			if(collectionHasBody && !jsonOut.body) jsonOut.body = require("marked")(fmContent.body)
+			this.emitFile(jsonPath, JSON.stringify(jsonOut))
+			copiedFiles.add(jsonPath)
 		}
 
 		result.push(cmsEntry)
