@@ -1,6 +1,6 @@
 {
 	"name": "netlify-cms-loader",
-	"version": "0.5.0",
+	"version": "0.5.1",
 	"description": "netlify-cms-loader",
 	"main": "index.js",
 	"scripts": {
