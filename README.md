@@ -4,6 +4,8 @@ A webpack loader to require() content from the [Netlify CMS](https://www.netlify
 
 The loader processes the .md files of a collection and outputs their content and file path as an array of objects.
 
+Additionally the loader will also copy all assets from your configs `media_folder` to the configs `public_folder`.
+
 **Note:** This is a 3rd-party loader. I am in no way affiliated with [Netlify](https://www.netlify.com/), though I wholeheartedly recommend anyone to check them out.
 
 **Breaking changes can occur in minor releases before v1.0.0 and not all CMS use cases are covered in the current version.**
