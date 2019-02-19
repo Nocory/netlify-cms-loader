@@ -1,32 +1,24 @@
 const yaml = require('js-yaml')
 const path = require('path')
 const fm = require('front-matter')
+const marked = require("marked")
 //const md = require('markdown-it')()
 const loaderUtils = require("loader-utils")
 
-const checkForBody = (collection) => {
-	console.log(collection)
-	for (let field of collection.fields) {
-		if (field.name === "body") return true
-	}
-	return false
-}
-
-let copiedFiles = new Set()
 let isMediaCopied = false
 
 const loaderFnc = function(source) {
-
 	this.cacheable()
 
 	const cmsConfig = yaml.safeLoad(source)
 
 	// Merging default and user specified options
 	const options = {
-		collection: "posts",
+		collection: "",
 		bodyLimit: 256,
-		copyFiles: true,
-		//copyMedia: true,
+		emitSource: false,
+		emitJSON: true,
+		parseBody: true,
 		sortBy: "",
 		reverse: false,
 		outputDirectory: "cms"
@@ -42,27 +34,19 @@ const loaderFnc = function(source) {
 			this.emitFile(path.join(cmsConfig.public_folder, fileName), fileContent)
 		}
 		isMediaCopied = true
-
 		console.timeEnd("netlify-cms-loader: copied media files")
 	}
 
 	// Check collection is valid, otherwise exit with error //TODO: improve (see error message)
 	if (!options.collection) {
-		this.emitError("no collection specified")
+		throw new Error("netlify-cms-loader: no collection specified")
 	}
 	const collection = cmsConfig.collections.find((el) => el.name === options.collection)
 	if (!collection) {
-		this.emitError("collection not found in config")
+		throw new Error(`netlify-cms-loader: collection '${options.collection}' not found. Available collections are [${cmsConfig.collections.map(x => x.name)}]`)
 	}
 
 	console.time(`netlify-cms-loader: finished loading collection '${options.collection}'`)
-
-	/*
-		Check if items of the collection have a body. This is assigned to the '.hasBody' property.
-		Since not all collections might have markdown bodies, this info can be useful to decide,
-		whether the .md file needs to be fetched by the app.
-	*/
-	const collectionHasBody = checkForBody(collection)
 
 	const result = []
 
@@ -75,27 +59,27 @@ const loaderFnc = function(source) {
 		let fmContent = fm(fileContent)
 		let cmsEntry = fmContent.attributes
 
-		cmsEntry.hasBody = collectionHasBody
-		if (collectionHasBody && fmContent.body.length < options.bodyLimit) {
-			cmsEntry.body = fmContent.body
+		if(fmContent.body){
+			cmsEntry.hasBody = true
+			if (fmContent.body.length < options.bodyLimit) {
+				cmsEntry.body = options.parseBody ? marked(fmContent.body) : fmContent.body
+			}
+		}else{
+			cmsEntry.hasBody = false
 		}
 
-		// Automatically copying CMS .md files to the build directory, unless specified otherwise by options
-		let copyPath = path.join(options.outputDirectory, collection.name, fileName)
-		if (options.copyFiles && !copiedFiles.has(copyPath)) {
-			// *.md
-			this.emitFile(copyPath, fileContent)
-			copiedFiles.add(copyPath)
-			// *.json
-			const jsonPath = (copyPath).replace(/\.md$/,".json")
+		// Automatically emit CMS .md files to the build directory as .md and .json, unless specified otherwise by options
+		let mdPath = path.join(options.outputDirectory, collection.name, fileName)
+		if (options.emitSource) {
+			cmsEntry.filePath = mdPath
+			this.emitFile(mdPath, fileContent)
+		}
+		if(options.emitJSON){
+			const jsonPath = mdPath.replace(/\.md$/,".json")
 			cmsEntry.filePath = jsonPath
 			const jsonOut = Object.assign({},cmsEntry)
-			//console.log(jsonPath)
-			//console.log(jsonOut)
-			//if(collectionHasBody && !jsonOut.body) jsonOut.body = md.render(fmContent.body)
-			if(collectionHasBody && !jsonOut.body) jsonOut.body = require("marked")(fmContent.body)
+			if(jsonOut.hasBody && !jsonOut.body) jsonOut.body = options.parseBody ? marked(fmContent.body) : fmContent.body
 			this.emitFile(jsonPath, JSON.stringify(jsonOut))
-			copiedFiles.add(jsonPath)
 		}
 
 		result.push(cmsEntry)
@@ -120,13 +104,10 @@ const loaderFnc = function(source) {
 				return 0
 			})
 		}
-
 	}
 
 	if (options.reverse) result.reverse()
 
-
-	//console.log(`netlify-cms-loader: finished loading ${collection.name}`)
 	console.timeEnd(`netlify-cms-loader: finished loading collection '${options.collection}'`)
 
 	return `module.exports = ${JSON.stringify(result)}`
