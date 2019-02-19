@@ -1,3 +1,16 @@
+### 0.5.2
+- **new:** the loader now parses markdown bodies to HTML by default
+- **new:** processed CMS .md entries are emitted as .json files by default
+- updated loader options (see the updated readme)
+- better error handling if a collection is not specified
+
+---
+
+***restarted development***
+
+---
+
+
 ###### 0.4.1
 - actually update readme
 
