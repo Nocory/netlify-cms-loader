@@ -1,4 +1,4 @@
-## netlify-cms-loader 0.5.2
+## netlify-cms-loader
 
 A webpack loader to require() content from the [Netlify CMS](https://www.netlifycms.org/) in your website or single-page-application.
 
@@ -27,7 +27,7 @@ Additionally the loader will also copy all assets from your configs `media_folde
 #### Using the loader
 require() your Netlify CMS config file with the loader inline.
 
-You must at least specify the name of the collection, that you want to retreive information about. The remaining options have fairly sane defaults, but can always be changed to your liking.
+You must at least specify the name of the collection, that you want to retrieve information about. The remaining options have fairly sane defaults, but can always be changed to your liking.
 
 ```javascript
 const cmsPosts = require(`netlify-cms-loader?{
