@@ -8,20 +8,34 @@ Additionally the loader will also copy all assets from your configs `media_folde
 
 **Note:** This is a 3rd-party loader. I am in no way affiliated with [Netlify](https://www.netlify.com/), though I wholeheartedly recommend anyone to check them out.
 
-**Breaking changes can occur in minor releases before v1.0.0 and not all CMS use cases are covered in the current version.**
+>**Breaking changes can occur in minor releases before v1.0.0 and not all CMS use cases are covered in the current version.**
 
-**I do not reccommend to use this in any important production environment.**
+>**I do not recommend to use this library in any important production environment.**
 
 ---
 #### Loader options (and defaults)
-* ```collection``` *("", **required**)* Name of the collection you want to retrieve.
-* ```bodyLimit``` *(256)* Include body in the loaders output, if body-length is less than specified. This can save http-requests for smaller entries later on.
-* ```emitSource``` *(false)* Copy unprocessed .md files to the output directory.
-* ```emitJSON``` *(true)* Emit file converted to JSON to the output directory. (you can set this to false if you only need the object returned from the loader)
-* ```parseBody``` *(true)* Parse the .md files markdown body and include the resulting HTML in the loaders output and the emitted JSON file.
-* ```sortBy``` *("")* Name of widget the output should be sorted by.
-* ```reverse``` *(false)* Reverse output array. Useful for sorting by date with newest item coming first.
-* ```outputDirectory``` *("cms")* This is where emitted files are written to. The final path is "outputDirectory/collection/filename.(json|md)".
+
+* `collection: ''` **(required)** Name of the collection you want to retrieve.  
+* `bodyLimit: 256` Include body in the loaders output, if body-length is less than specified. This can save http-requests for smaller entries later on.
+* `emitSource: false` Copy unprocessed .md files to the output directory.
+* `emitJSON: true` Emit file converted to JSON to the output directory. (you can set this to false if you only need the object returned from the loader)
+* `parseBody: true` Parse the .md files markdown body and include the resulting HTML in the loaders output and the emitted JSON file.
+* `sortBy: ''` Name of widget the output should be sorted by.
+* `reverse: false` Reverse output array. Useful for sorting by date with newest item coming first.
+* `outputDirectory: 'cms'` This is where emitted files are written to. The final path is "outputDirectory/collection/filename.(json|md)".
+
+```javascript
+require(`netlify-cms-loader?{
+	collection: '', // required
+	bodyLimit: '256',
+	emitSource: false,
+	emitJSON: true,
+	parseBody: true,
+	sortBy: '',
+	reverse: false,
+	outputDirectory: 'cms',
+}!admin/config.yml`)
+```
 
 ---
 #### Using the loader
