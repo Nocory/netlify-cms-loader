@@ -24,19 +24,6 @@ Additionally the loader will also copy all assets from your configs `media_folde
 * `reverse: false` Reverse output array. Useful for sorting by date with newest item coming first.
 * `outputDirectory: 'cms'` This is where emitted files are written to. The final path is "outputDirectory/collection/filename.(json|md)".
 
-```javascript
-require(`netlify-cms-loader?{
-	collection: '', // required
-	bodyLimit: '256',
-	emitSource: false,
-	emitJSON: true,
-	parseBody: true,
-	sortBy: '',
-	reverse: false,
-	outputDirectory: 'cms',
-}!admin/config.yml`)
-```
-
 ---
 #### Using the loader
 require() your Netlify CMS config file with the loader inline.
