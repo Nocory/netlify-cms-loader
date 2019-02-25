@@ -1,3 +1,6 @@
+### 0.7.1
+- **fixed:** initial sorting by file names
+
 ### 0.7.0
 - **changed:** revamped options
 - **new:** added shorthand version

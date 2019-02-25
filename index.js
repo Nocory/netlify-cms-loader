@@ -98,7 +98,11 @@ const loaderFnc = function(source) {
 		this.addDependency(x.srcPath)
 	})
 
-	filesInCollection.sort((a,b) => b.srcPath - a.srcPath)
+	filesInCollection.sort((a,b) => {
+		if(a.srcPath < b.srcPath) return 1
+		if(a.srcPath > b.srcPath) return -1
+		return 0
+	})
 	if (options.reverse) filesInCollection.reverse()
 	if (options.limit) filesInCollection = filesInCollection.slice(0,options.limit)
 
