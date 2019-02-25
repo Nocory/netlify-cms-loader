@@ -1,3 +1,8 @@
+### 0.7.0
+- **changed:** revamped options
+- **new:** added shorthand version
+- **new:** possibility for more concise inline string
+
 ### 0.5.2
 - **new:** the loader now parses markdown bodies to HTML by default
 - **new:** processed CMS .md entries are emitted as .json files by default

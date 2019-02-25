@@ -1,30 +1,59 @@
 {
-	"name": "netlify-cms-loader",
-	"version": "0.5.2",
-	"description": "netlify-cms-loader",
-	"main": "index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/Nocory/netlify-cms-loader.git"
-	},
-	"keywords": [
-		"netlify",
-		"cms",
-		"loader",
-		"webpack"
-	],
-	"author": "Marc Eichhorn <contact@marceichhorn.com>",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/Nocory/netlify-cms-loader/issues"
-	},
-	"homepage": "https://github.com/Nocory/netlify-cms-loader#readme",
-	"dependencies": {
-		"front-matter": "^3.0.0",
-		"js-yaml": "^3.10.0",
-		"marked": "^0.6.0"
-	}
+  "_from": "netlify-cms-loader@0.5.2",
+  "_id": "netlify-cms-loader@0.5.2",
+  "_inBundle": false,
+  "_integrity": "sha512-mRnD8C1cWlyA0MfaURomwtYWmR592XgNHD9Y54hvVmDJmnhpjZtRRr6I4tal2OhCJDU4djglXYvg+NoooBGFZg==",
+  "_location": "/netlify-cms-loader",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "netlify-cms-loader@0.5.2",
+    "name": "netlify-cms-loader",
+    "escapedName": "netlify-cms-loader",
+    "rawSpec": "0.5.2",
+    "saveSpec": null,
+    "fetchSpec": "0.5.2"
+  },
+  "_requiredBy": [
+    "#DEV:/",
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/netlify-cms-loader/-/netlify-cms-loader-0.5.2.tgz",
+  "_shasum": "703bac78ab15b545458d51f1b5fa1f4951d0c3d5",
+  "_spec": "netlify-cms-loader@0.5.2",
+  "_where": "/mnt/c/Users/Marc/Projects/netlify-cms-loader-example-site",
+  "author": {
+    "name": "Marc Eichhorn",
+    "email": "contact@marceichhorn.com"
+  },
+  "bugs": {
+    "url": "https://github.com/Nocory/netlify-cms-loader/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "gray-matter": "^4.0.2",
+    "js-yaml": "^3.10.0",
+    "marked": "^0.6.0"
+  },
+  "deprecated": false,
+  "description": "netlify-cms-loader",
+  "homepage": "https://github.com/Nocory/netlify-cms-loader#readme",
+  "keywords": [
+    "netlify",
+    "cms",
+    "loader",
+    "webpack"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "netlify-cms-loader",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nocory/netlify-cms-loader.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.7.0"
 }

@@ -1,104 +1,152 @@
-## netlify-cms-loader
+# netlify-cms-loader
 
 A webpack loader to require() content from the [Netlify CMS](https://www.netlifycms.org/) in your website or single-page-application.
 
-The loader processes the .md files of a collection and outputs their content and file path as an array of objects.
+The loader processes the files of a collection and outputs their content as an array of objects.
 
-Additionally the loader will also copy all assets from your configs `media_folder` to the configs `public_folder`.
+If the processed file contains a fields for an image or file widget, then the resource at that path will be copied to your configurations public_folder.
 
 **Note:** This is a 3rd-party loader. I am in no way affiliated with [Netlify](https://www.netlify.com/), though I wholeheartedly recommend anyone to check them out.
 
->**Breaking changes can occur in minor releases before v1.0.0 and not all CMS use cases are covered in the current version.**
+>**Breaking changes occur with every minor patch version until 1.0.0**
 
->**I do not recommend to use this library in any important production environment.**
+>**For now I recommend to use this loader only in an experimental way and not in any real production environment**
 
 ---
 #### Loader options (and defaults)
 
-* `collection: ''` **(required)** Name of the collection you want to retrieve.  
-* `bodyLimit: 256` Include body in the loaders output, if body-length is less than specified. This can save http-requests for smaller entries later on.
-* `emitSource: false` Copy unprocessed .md files to the output directory.
-* `emitJSON: true` Emit file converted to JSON to the output directory. (you can set this to false if you only need the object returned from the loader)
-* `parseBody: true` Parse the .md files markdown body and include the resulting HTML in the loaders output and the emitted JSON file.
-* `sortBy: ''` Name of widget the output should be sorted by.
-* `reverse: false` Reverse output array. Useful for sorting by date with newest item coming first.
-* `outputDirectory: 'cms'` This is where emitted files are written to. The final path is "outputDirectory/collection/filename.(json|md)".
+Option | Default | Description
+---|---|---
+collection  | ''    | **(required)** Name of the collection you want to retrieve.  
+file        | ''    | If specified and `collection` is a file collection, then only this single file will be processed. (Loader output will become a single object instead of an array of objects)
+parseBody   | true  | If the entry has a `body` field, then it will be parsed to HTML.
+includeBody | false | Include the body in the loaders output? (The body will always be present in the emitted .json file to be fetched by the client on demand)
+keys        | []    | Only include these fields in the loaders output. (The emitted .json file always contains all fields)
+limit       | 0     | If not 0, limit output to n entries. (The n newest entries, if the entries file name starts with and is derived from the entries creation date)
+emitJSON    | true  | Convert CMS files to JSON format and emit them to the output directory. (you can set this to false if you only need the direct loader output and don't intend to fetch any emitted .json files later on)
+outputDirectory | 'cms' | Emitted JSON files are written to this directory. The final path is "outputDirectory/collection/filename.json". (this path will be included as the `filePath` property in the loaders output)
 
 ---
+#### What the loader does
+
+* copy the associated images and files of the required cms entries to the `outputDirectory`
+* add `hasBody` property to the output, if cms entry has a body field
+* add `filePath` property to the output, if a .json file is emitted
+>todo: add more detailed explanation
+
 #### Using the loader
-require() your Netlify CMS config file with the loader inline.
-
-You must at least specify the name of the collection, that you want to retrieve information about. The remaining options have fairly sane defaults, but can always be changed to your liking.
+The loader should be used inline.
 
 ```javascript
-const cmsPosts = require(`netlify-cms-loader?{
-	collection:'posts',
-	sortBy:'date',
-	reverse:true,
-}!admin/config.yml`)
+const allMyPosts = require("netlify-cms-loader?collection=posts!admin/config.yml")
 ```
-Alternatively with deprecated query strings:
+While that first example looks a bit unwieldy, with only some configuration it can be made much more concise and easy to read.
 ```javascript
-const cmsPosts = require('netlify-cms-loader?collection=posts&sortBy=date&reverse=true!admin/config.yml')
+const allMyPosts = require("cms?posts!")
 ```
+I think the webpack inline loader syntax of question and exclamation marks even makes some good sense here in a coincidental way... ***from the cms? get posts!***
 
-The loaders output is an array of objects, corresponding to the processed markdown files of the collection.
-
-In addition to each files front-matter, the loader adds two additional properties ***filePath*** and ***hasBody*** . (Please make sure, that these don't collide with the fields from your CMS collection. This might be addressed in future versions, if it turns out to be an issue.)
-
-If the `emitJSON` option is true, then ***filePath*** always points to the .json file in the `outputDirectory`. If `emitJSON` is false, but `emitSource` is true, then ***filePath*** will point to the emitted .md file instead.
-
-***hasBody*** indicates, whether the entry has a ***body***. If ***hasBody*** is true, but no ***body*** is present on the object, then this can let the app know, that it should fetch the emitted .json (or .md) file to get the required data.
-
-###### Example output of the loader:
+To achieve this I would recommend two things. First create an environment variable called `NETLIFY_CMS_LOADER_CONFIG` and assign it the path to the config.yml file. How the variable should be declared is up to you. This is only one example.
 ```javascript
-require(`netlify-cms-loader?{
-	collection:'posts',
-	outputDirectory:'cms_alt',
-	sortBy:'date',
-	reverse:true,
-}!admin/config.yml`)
-// will make the laoder output the following:
+//package.json
+"scripts": {
+	// ...
+	"dev": "NODE_ENV=development NETLIFY_CMS_LOADER_CONFIG=src/admin/config.yml webpack-dev-server --config build_config/webpack.config.js"
+},
+```
+This will let you omit the config.yml file from the inline loader.
+
+Second is to create a loader alias to shorten `netlify-cms-loader` to just `cms`
+```javascript
+//in your webpack config
+resolveLoader: {
+	modules: [path.resolve('node_modules')],
+	alias: {
+		"cms": "netlify-cms-loader"
+	}
+}
+```
+All done.
+
+You can use the loader either with a query string or an options object. There is also a shorthand version where you specify the name of a collection as the only argument.
+
+Single files of a file collection can also be imported via shorthand by separating the collection and file name with a "/" `require("cms?someCollection/someFilename!")`
+
+By default the body field of a CMS entry is not included in the loaders output. The client can fetch the entries .json file if its body data is needed. Alternatively set `includeBody: true` to always include body content in the loaders output.
+
+#### Examples:
+
+Using a query string to fetch the 2 newest items in a collection
+```javascript
+const latestPosts = require("cms?collection=posts&limit=2!")
+
+// Example output:
 [{
-	title: "Long blog post",
-	image: "/uploads/hero_image.jpg",
-	filePath: "cms_alt/posts/2017-09-20-long-blog-post.json",
-	hasBody: true
-}, {
-	title: "A short story",
-	image: "/uploads/placeholder.jpg",
-	filePath: "cms_alt/posts/2017-09-22-a-short-story.json",
+	title: "The newest post",
+	author: "John Doe",
+	image : "/uploads/neatImage.jpg",
 	hasBody: true,
-	body: "This body is short enough to be included right away"
-}, {
-	title: "A longer story",
-	image: "/uploads/test.jpg",
-	filePath: "cms_alt/posts/2017-09-23-a-longer-story.json",
-	hasBody: true
+	filePath : "cms/posts/2018-08-02_the-newest-post.json",
+},{
+	title: "A slightly older post",
+	author: "John Doe",
+	image : "/uploads/greatPicture.jpg",
+	hasBody: true,
+	filePath : "cms/posts/2018-07-24_slightly-older-post.json",
 }]
 ```
+---
+Using a template string (notice the backticks \` ... \` ) with an option object to fetch all items of the 'news' collection, but only return the title and date fields.
 ```javascript
-require(`netlify-cms-loader?{
-	collection:'images',
-	emitJSON: false
-}!admin/config.yml`)
-// will make the laoder output the following:
+const allNews = require(`cms?{
+	collection: 'news',
+	fields: ['title','date']
+}!`)
+
+// Example output:
 [{
-	title : "Torii",
-	image : "/uploads/torii.jpg",
-	hasBody : false
-}, {
-	title : "Forest",
-	image : "/uploads/myForestImg.jpg",
-	hasBody : false
-}, {
-	title : "Wave",
-	image : "/uploads/a_wave.jpg",
-	hasBody : false
-}]
+	title: "Some Title",
+	date : "2017-08-02T02:55:59.161Z",
+	hasBody: true,
+	filePath: "cms/news/2017-08-02_someNews.json"
+},{/*...*/},{/*...*/},{/*...*/},{/*...*/}]
+```
+---
+Fetch all news items by using a shorthand for the collection name. (if only a single query parameter is included, then that will used as argument for the collection name)
+```javascript
+const allNews = require("cms?news!")
+
+// Example output:
+[{
+	title: "Some Title",
+	author: "John Does",
+	tags: ["Festival","Outdoors"],
+	date : "2017-08-02T02:55:59.161Z",
+	hasBody: true,
+	filePath: "cms/news/2017-08-02_someNews.json"
+},{/*...*/},{/*...*/},{/*...*/},{/*...*/}]
+```
+---
+Using shorthand to fetch a single file of a file collection. (This will return an object directly instead of an array of objects)
+```javascript
+const john = require("cms?people/JohnDoe!")
+
+// Example output:
+{
+	title: "JohnDoe",
+	name: "John Doe",
+	age: 29,
+	location: "Earth",
+	filePath: "cms/people/JohnDoe.json"
+}
 ```
 
 ---
-See a live example of a test-site built with the loader [here](https://netlify-cms-loader.netlify.com/).
+See a live example of a test-site using the loader to require some content [here](https://netlify-cms-loader.netlify.com/).
 
 Code example of a Vue component using the loader [here](https://github.com/Nocory/netlify_cms/blob/master/src/components/cms.vue).
+
+#### Caveats
+
+* Currently the loader only processes files that contain front-matter and can be directly parsed by the [gray-matter library](https://www.npmjs.com/package/gray-matter/) or are plain .json files.
+* The same collection should not be required in multiple places while using different options. Doing so will result in the loader outputting 2 separate arrays, which may have overlapping entries, thus unnecessarily increasing the bundle size.
