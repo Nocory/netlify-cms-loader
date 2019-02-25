@@ -33,6 +33,18 @@ const loaderFnc = function(source) {
 
 	const cmsConfig = yaml.safeLoad(this.fs.readFileSync(source || path.resolve(process.env.NETLIFY_CMS_LOADER_CONFIG)))
 
+	//copy media files
+	/*
+	console.time("netlify-cms-loader: copied media files")
+	this.addContextDependency(cmsConfig.media_folder)
+	for (let fileName of this.fs.readdirSync(cmsConfig.media_folder)) {
+		this.addDependency(path.resolve(cmsConfig.media_folder,fileName))
+		const fileContent = this.fs.readFileSync(path.resolve(cmsConfig.media_folder, fileName))
+		this.emitFile(path.join(cmsConfig.public_folder, fileName), fileContent)
+	}
+	console.timeEnd("netlify-cms-loader: copied media files")
+	*/
+
 	// Merging default and user specified options
 	const options = {
 		collection: null,
@@ -54,7 +66,7 @@ const loaderFnc = function(source) {
 		passedOptions = {collection: Object.keys(passedOptions)[0]}
 	}
 	[passedOptions.collection,passedOptions.file] = passedOptions.collection.split("/")
-	console.log("passedOptions:",passedOptions)
+	//console.log("passedOptions:",passedOptions)
 	Object.assign(options, passedOptions)
 	
 	const collection = cmsConfig.collections.find((el) => el.name === options.collection)
@@ -113,9 +125,11 @@ const loaderFnc = function(source) {
 		const matterFile = parseFile(fileContent)
 		const cmsEntry = matterFile.data
 
+		/*
 		for(const entry of fileInfo.fileWidgets){
 			this.emitFile(path.join(cmsConfig.public_folder, path.basename(cmsEntry[entry])), this.fs.readFileSync(path.resolve(cmsConfig.media_folder, path.basename(cmsEntry[entry]))))
 		}
+		*/
 
 		if(typeof matterFile.content === "string" && matterFile.content.trim().length){
 			cmsEntry.hasBody = true

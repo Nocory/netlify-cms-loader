@@ -1,3 +1,6 @@
+### 0.7.2
+- **changed:** Loader no longer deals with copying media files
+
 ### 0.7.1
 - **fixed:** initial sorting by file names
 
@@ -19,7 +22,7 @@
 ---
 
 
-###### 0.4.1
+### 0.4.1
 - actually update readme
 
 ### 0.4.0
@@ -37,7 +40,7 @@
 - added option ```sortBy```: *default ""*, name of widget the output should be sorted by. (can be string, number or datetime)
 - added option ```reverse```: *default false*, reverse output array. Useful for sorting by date with newest item coming first
 
-###### 0.2.3
+### 0.2.3
 - changed default of *bodyLimit* option to 256 characters
 - updated readme
 

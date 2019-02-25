@@ -28,12 +28,35 @@ outputDirectory | 'cms' | Emitted JSON files are written to this directory. The 
 
 ---
 #### What the loader does
+* processes the required collection files
+* adds `hasBody` property to the output, if file has a body field
+* adds `filePath` property to the output, if a .json file is emitted
+* returns collection data as array of objects
+* emits processed collection files as JSON to `outputDirectory`
 
-* copy the associated images and files of the required cms entries to the `outputDirectory`
-* add `hasBody` property to the output, if cms entry has a body field
-* add `filePath` property to the output, if a .json file is emitted
->todo: add more detailed explanation
+---
+#### Setup
+Install the loader as a dev dependency
+```javascript
+npm install netlify-cms-loader --save-dev
+```
+The loader will only emit its own .json files of processed CMS entries.
 
+It does not copy any static assets, such as the files in the `media_folder` of the CMS. Make sure that those files get copied to the `public_folder` path specified in your config.yml.
+
+You can use the [copy-webpack-plugin](https://www.npmjs.com/package/copy-webpack-plugin) for this.
+```javascript
+/* config.yml
+media_folder: "src/uploads"
+public_folder: "uploads"
+*/
+new CopyWebpackPlugin([
+	{ from: 'src/admin', to: 'admin' },
+	{ from: 'src/uploads', to: 'uploads' }
+])
+```
+
+---
 #### Using the loader
 The loader should be used inline.
 
@@ -74,6 +97,7 @@ Single files of a file collection can also be imported via shorthand by separati
 
 By default the body field of a CMS entry is not included in the loaders output. The client can fetch the entries .json file if its body data is needed. Alternatively set `includeBody: true` to always include body content in the loaders output.
 
+---
 #### Examples:
 
 Using a query string to fetch the 2 newest items in a collection
