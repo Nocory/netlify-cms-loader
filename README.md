@@ -1,14 +1,14 @@
 # netlify-cms-loader
 
-A webpack loader to require() content from the [Netlify CMS](https://www.netlifycms.org/) in your website or single-page-application.
+A webpack loader to require() content from the [Netlify CMS](https://www.netlifycms.org/) by referencing collections via their configured name.
 
-The loader processes the files of a collection and outputs their content as an array of objects.
+The loader processes the files of a collection and outputs their content as an array of objects. Additionally all processed CMS entries will be converted to JSON and added to the final Webpack result.
 
-If the processed file contains a fields for an image or file widget, then the resource at that path will be copied to your configurations public_folder.
+By default everything but the body field is included in the output in order to not bloat the Webpack bundle with content, that may not be needed right away.
 
 **Note:** This is a 3rd-party loader. I am in no way affiliated with [Netlify](https://www.netlify.com/), though I wholeheartedly recommend anyone to check them out.
 
->**Breaking changes occur with every minor patch version until 1.0.0**
+>**Breaking changes will occur with every minor version until 1.0.0**
 
 >**For now I recommend to use this loader only in an experimental way and not in any real production environment**
 
@@ -18,17 +18,17 @@ If the processed file contains a fields for an image or file widget, then the re
 Option | Default | Description
 ---|---|---
 collection  | ''    | **(required)** Name of the collection you want to retrieve.  
-file        | ''    | If specified and `collection` is a file collection, then only this single file will be processed. (Loader output will become a single object instead of an array of objects)
-parseBody   | true  | If the entry has a `body` field, then it will be parsed to HTML.
-includeBody | false | Include the body in the loaders output? (The body will always be present in the emitted .json file to be fetched by the client on demand)
-keys        | []    | Only include these fields in the loaders output. (The emitted .json file always contains all fields)
-limit       | 0     | If not 0, limit output to n entries. (The n newest entries, if the entries file name starts with and is derived from the entries creation date)
-emitJSON    | true  | Convert CMS files to JSON format and emit them to the output directory. (you can set this to false if you only need the direct loader output and don't intend to fetch any emitted .json files later on)
+file        | ''    | If specified and `collection` is a file collection, then only the file entry with this name will be processed. (Loader output will become a single object instead of an array of objects)
+parseBody   | true  | If true and if the entry has a `body` field, then Markdown will be parsed to HTML.
+includeBody | false | If true, then the (parsed) body will be included in the loaders output. (The body will always be present in the emitted .json file to be fetched by the client on demand)
+fields        | []    | Only include these fields in the loaders output. (Value should be an array of strings. The emitted .json file always contains all fields)
+limit       | 0     | If not 0, limit output to n entries. (The n newest entries, if the entries filename on disk starts with and is derived from the entries creation date)
+emitJSON    | true  | Convert CMS files to JSON format and emit them to the output directory. (You can set this to false if you only need the direct loader output and don't intend to fetch any emitted .json files later on)
 outputDirectory | 'cms' | Emitted JSON files are written to this directory. The final path is "outputDirectory/collection/filename.json". (this path will be included as the `filePath` property in the loaders output)
 
 ---
 #### What the loader does
-* processes the required collection files
+* loads and processes the required collection files
 * adds `hasBody` property to the output, if file has a body field
 * adds `filePath` property to the output, if a .json file is emitted
 * returns collection data as array of objects
@@ -63,6 +63,7 @@ The loader should be used inline.
 ```javascript
 const allMyPosts = require("netlify-cms-loader?collection=posts!admin/config.yml")
 ```
+
 While that first example looks a bit unwieldy, with only some configuration it can be made much more concise and easy to read.
 ```javascript
 const allMyPosts = require("cms?posts!")
@@ -93,9 +94,11 @@ All done.
 
 You can use the loader either with a query string or an options object. There is also a shorthand version where you specify the name of a collection as the only argument.
 
-Single files of a file collection can also be imported via shorthand by separating the collection and file name with a "/" `require("cms?someCollection/someFilename!")`
+Single files of a file collection can also be imported via shorthand by separating the collection and name of the file entry with a "/" `require("cms?someCollection/someName!")`
 
-By default the body field of a CMS entry is not included in the loaders output. The client can fetch the entries .json file if its body data is needed. Alternatively set `includeBody: true` to always include body content in the loaders output.
+By default the body field of a CMS entry is not included in the loaders output. The presence of a body will be indicated by the `hasBody` property being present in output object.
+
+The client can then fetch an entries .json file when its body data is needed. Alternatively set `includeBody: true` to always include body content in the loaders output.
 
 ---
 #### Examples:
@@ -143,7 +146,7 @@ const allNews = require("cms?news!")
 // Example output:
 [{
 	title: "Some Title",
-	author: "John Does",
+	author: "John Doe",
 	tags: ["Festival","Outdoors"],
 	date : "2017-08-02T02:55:59.161Z",
 	hasBody: true,
@@ -157,8 +160,8 @@ const john = require("cms?people/JohnDoe!")
 
 // Example output:
 {
-	title: "JohnDoe",
-	name: "John Doe",
+	firstName: "John",
+	lastName: "Doe",
 	age: 29,
 	location: "Earth",
 	filePath: "cms/people/JohnDoe.json"

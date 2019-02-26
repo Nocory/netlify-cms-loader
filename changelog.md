@@ -1,3 +1,6 @@
+### 0.7.3
+- **fixed:** Some code-cleanup and readme corrections
+
 ### 0.7.2
 - **changed:** Loader no longer deals with copying media files
 

@@ -33,18 +33,6 @@ const loaderFnc = function(source) {
 
 	const cmsConfig = yaml.safeLoad(this.fs.readFileSync(source || path.resolve(process.env.NETLIFY_CMS_LOADER_CONFIG)))
 
-	//copy media files
-	/*
-	console.time("netlify-cms-loader: copied media files")
-	this.addContextDependency(cmsConfig.media_folder)
-	for (let fileName of this.fs.readdirSync(cmsConfig.media_folder)) {
-		this.addDependency(path.resolve(cmsConfig.media_folder,fileName))
-		const fileContent = this.fs.readFileSync(path.resolve(cmsConfig.media_folder, fileName))
-		this.emitFile(path.join(cmsConfig.public_folder, fileName), fileContent)
-	}
-	console.timeEnd("netlify-cms-loader: copied media files")
-	*/
-
 	// Merging default and user specified options
 	const options = {
 		collection: null,
@@ -52,7 +40,7 @@ const loaderFnc = function(source) {
 
 		parseBody: true,
 		includeBody: false,
-		fields: null,
+		fields: [],
 		
 		reverse: false,
 		limit: 0,
@@ -69,6 +57,7 @@ const loaderFnc = function(source) {
 	//console.log("passedOptions:",passedOptions)
 	Object.assign(options, passedOptions)
 	
+	// Determine which collection should be processed
 	const collection = cmsConfig.collections.find((el) => el.name === options.collection)
 	if (!collection) {
 		throw new Error(`netlify-cms-loader: collection '${options.collection}' not found. Available collections are [${cmsConfig.collections.map(x => x.name)}]`)
@@ -79,11 +68,9 @@ const loaderFnc = function(source) {
 	let filesInCollection = []
 	if(collection.folder){
 		this.addContextDependency(collection.folder)
-		const fileWidgets = collection.fields.filter(x => x.widget == "file" || x.widget == "image").map(x => x.name)
 		filesInCollection = this.fs.readdirSync(collection.folder).map(x => ({
 			srcPath: path.resolve(collection.folder,x),
-			name: path.basename(x,path.extname(x)),
-			fileWidgets
+			name: path.basename(x,path.extname(x))
 		}))
 	}
 	if(collection.files){
@@ -94,14 +81,12 @@ const loaderFnc = function(source) {
 			}
 			filesInCollection = [{
 				srcPath: path.resolve(foundItem.file),
-				name: foundItem.name,
-				fileWidgets: foundItem.fields.filter(x => x.widget == "file" || x.widget == "image").map(x => x.name)
+				name: foundItem.name
 			}]
 		}else{
 			filesInCollection = collection.files.map(x => ({
 				srcPath: path.resolve(x.file),
 				name: x.name,
-				fileWidgets: x.fields.filter(x => x.widget == "file" || x.widget == "image").map(x => x.name)
 			}))
 		}
 	}
@@ -125,19 +110,11 @@ const loaderFnc = function(source) {
 		const matterFile = parseFile(fileContent)
 		const cmsEntry = matterFile.data
 
-		/*
-		for(const entry of fileInfo.fileWidgets){
-			this.emitFile(path.join(cmsConfig.public_folder, path.basename(cmsEntry[entry])), this.fs.readFileSync(path.resolve(cmsConfig.media_folder, path.basename(cmsEntry[entry]))))
-		}
-		*/
-
 		if(typeof matterFile.content === "string" && matterFile.content.trim().length){
 			cmsEntry.hasBody = true
 			if (options.includeBody) {
 				cmsEntry.body = options.parseBody ? marked(matterFile.content) : matterFile.content
 			}
-		}else{
-			//cmsEntry.hasBody = false
 		}
 		
 		if(options.emitJSON){
@@ -147,7 +124,7 @@ const loaderFnc = function(source) {
 			this.emitFile(cmsEntry.filePath, JSON.stringify(jsonOut, null, "\t"))
 		}
 
-		if(options.fields){
+		if(options.fields.length){
 			const limitedResult = {}
 			for(const key in cmsEntry){
 				if(options.fields.includes(key)){
